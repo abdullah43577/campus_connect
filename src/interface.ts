@@ -43,3 +43,38 @@ export interface BankInfo {
     bank_id: number;
   };
 }
+
+export interface EventPaymentInitializer {
+  status: boolean;
+  message: string;
+  data: {
+    authorization_url: string;
+    access_code: string;
+    reference: string;
+  };
+}
+
+export interface TransferRecipientResponse {
+  status: boolean;
+  message: boolean;
+  data: {
+    active: boolean;
+    createdAt: Date;
+    currency: string;
+    domain: string;
+    id: number;
+    integration: number;
+    name: string;
+    recipient_code: string;
+    type: string;
+    updatedAt: Date;
+    is_deleted: boolean;
+    details: {
+      authorization_code: string;
+      account_number: string;
+      account_name: string;
+      bank_code: string;
+      bank_name: string;
+    };
+  };
+}

@@ -8,7 +8,8 @@ class Attendee extends Model<InferAttributes<Attendee>, InferCreationAttributes<
   declare attendee_id: string;
   declare event_id: string;
   declare amount_paid: CreationOptional<number>;
-  declare status: "confirmed" | "cancelled" | "pending";
+  declare balance_due: CreationOptional<number>;
+  declare payment_status: "complete" | "pending";
 }
 
 Attendee.init(
@@ -39,8 +40,12 @@ Attendee.init(
       type: DataTypes.INTEGER,
       defaultValue: 0,
     },
-    status: {
-      type: DataTypes.ENUM("confirmed", "cancelled", "pending"),
+    balance_due: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+    },
+    payment_status: {
+      type: DataTypes.ENUM("complete", "pending"),
       defaultValue: "pending",
     },
   },

@@ -11,6 +11,8 @@ import { authRouter } from "./routes/auth.routes";
 import { initializeSocket } from "./helper/socket";
 import { connectDB, sequelize } from "./lib/connectDB";
 import { eventRouter } from "./routes/event.routes";
+import axios from "axios";
+const { PAYSTACK_TEST_SECRET_KEY } = process.env;
 
 const app = express();
 export const cache = new Cache({ stdTTL: 3600 });
@@ -26,6 +28,14 @@ app.use(cookieParser());
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: false, limit: "10mb" }));
 app.use(helmet());
+
+export const api = axios.create({
+  baseURL: "https://api.paystack.co",
+  timeout: 1000,
+  headers: {
+    Authorization: `Bearer ${PAYSTACK_TEST_SECRET_KEY}`,
+  },
+});
 
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/event", eventRouter);

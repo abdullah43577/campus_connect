@@ -12,8 +12,10 @@ class Event extends Model<InferAttributes<Event>, InferCreationAttributes<Event>
   declare target_amount: number;
   declare contributed_so_far: number;
   declare bank_name: string;
+  declare bank_code: string;
   declare account_no: string;
   declare account_name: string;
+  declare recipient_code: string;
   declare status: "upcoming" | "ongoing" | "completed" | "cancelled";
 }
 
@@ -62,11 +64,19 @@ Event.init(
       type: DataTypes.STRING,
       allowNull: false,
     },
+    bank_code: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
     account_no: {
       type: DataTypes.STRING,
       allowNull: false,
     },
     account_name: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    recipient_code: {
       type: DataTypes.STRING,
       allowNull: false,
     },
