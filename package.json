@@ -1,7 +1,7 @@
 {
   "name": "campus_connect",
   "version": "1.0.0",
-  "description": "campus connect",
+  "description": "Campus Connect is an innovative event-based platform designed to foster community engagement and collaboration among university students. The platform serves as a centralized hub where students can discover, create, and contribute to various campus events, enhancing their university experience through meaningful connections and shared experiences.",
   "main": "./dist/server.js",
   "scripts": {
     "dev": "tsc --watch",
@@ -20,6 +20,7 @@
     "express": "^4.21.2",
     "helmet": "^8.0.0",
     "jsonwebtoken": "^9.0.2",
+    "mjml": "^4.15.3",
     "morgan": "^1.10.0",
     "node-cache": "^5.1.2",
     "nodemailer": "^6.10.0",
@@ -36,6 +37,7 @@
     "@types/cookie-parser": "^1.4.8",
     "@types/cors": "^2.8.17",
     "@types/jsonwebtoken": "^9.0.9",
+    "@types/mjml": "^4.7.4",
     "@types/morgan": "^1.9.9",
     "@types/node": "^22.13.10",
     "@types/nodemailer": "^6.4.17"

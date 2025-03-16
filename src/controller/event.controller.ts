@@ -1,6 +1,6 @@
 import { Response } from "express";
 import { handleErrors } from "../helper/handleErrors";
-import { BankInfo, EventPaymentInitializer, IUserRequest, NigerianBanksResponse, TransferRecipientResponse } from "../interface";
+import { BankInfo, EventPaymentInitializer, IUserRequest, NigerianBanksResponse, SubaccountCreation, TransferRecipientResponse } from "../interface";
 import { CreateEventSchema } from "../lib/schema/event_schema";
 import axios from "axios";
 import { api, cache } from "../server";
@@ -10,6 +10,7 @@ import User from "../models/user.model";
 import Payment from "../models/Payment.model";
 const { PAYSTACK_TEST_SECRET_KEY } = process.env;
 import crypto from "crypto";
+import Package from "../models/package.model";
 
 const fetch_nigerian_banks = async function (req: IUserRequest, res: Response) {
   try {
@@ -38,28 +39,26 @@ const create_event = async function (req: IUserRequest, res: Response) {
 
     if (!data.status) return res.status(400).json({ message: "Cannot find account with associated number" });
 
-    const { data: recipientData } = await api.post<TransferRecipientResponse>("/transferrecipient", {
-      type: "nuban",
-      name: rest.title,
+    const { data: subaccount } = await api.post<SubaccountCreation>("/subaccount", {
+      business_name: rest.title,
+      bank_code,
       account_number: account_no,
-      bank_code: bank_code,
-      currency: "NGN",
+      percentage_charge: 5,
     });
 
-    if (!recipientData.status) {
+    if (!subaccount.status) {
       return res.status(400).json({ message: "Failed to create transfer recipient" });
     }
 
-    const recipient_code = recipientData.data.recipient_code;
+    const recipient_code = subaccount.data.subaccount_code;
 
+    //* create event
     const event = await Event.create({
       organizer_id: userId,
       title: rest.title,
       description: rest.description,
       date: rest.date,
       location: rest.location,
-      target_amount: rest.target_amount,
-      contributed_so_far: rest.contributed_so_far,
       bank_name,
       bank_code,
       account_no,
@@ -67,6 +66,11 @@ const create_event = async function (req: IUserRequest, res: Response) {
       recipient_code,
       status: "ongoing",
     });
+
+    //* create packages
+    for (const pckg of rest.packages) {
+      await Package.create({ event_id: event.event_id, ...pckg });
+    }
 
     res.status(200).json({ message: "Event created successfully!", event });
   } catch (error) {
@@ -77,13 +81,14 @@ const create_event = async function (req: IUserRequest, res: Response) {
 const event_registration = async function (req: IUserRequest, res: Response) {
   try {
     const { userId } = req;
-    const { event_id } = req.body;
+    const { event_id, package_id } = req.body;
 
-    if (!event_id) return res.status(400).json({ message: "Event ID is required" });
+    if (!event_id || package_id) return res.status(400).json({ message: "Event and Package ID required" });
 
     const attendee = await Attendee.create({
       attendee_id: userId,
       event_id,
+      package_id,
       payment_status: "pending",
     });
 
@@ -107,6 +112,7 @@ const event_payment = async function (req: IUserRequest, res: Response) {
     const { data } = await api.post<EventPaymentInitializer>("/transaction/initialize", {
       email: user.email,
       amount: amount * 100,
+      subaccounts: event.recipient_code,
       metadata: {
         event_id,
         user_id: userId,
@@ -184,12 +190,12 @@ const event_payment_webhook = async function (req: IUserRequest, res: Response) 
 
       await attendee.save();
 
-      await api.post("/transfer", {
-        source: "balance",
-        amount: amount,
-        recipient: eventDetails.recipient_code,
-        reason: `Payment for ${eventDetails.title} - Registration ID: ${attendee.id}`,
-      });
+      // await api.post("/transfer", {
+      //   source: "balance",
+      //   amount: amount,
+      //   recipient: eventDetails.recipient_code,
+      //   reason: `Payment for ${eventDetails.title} - Registration ID: ${attendee.id}`,
+      // });
     }
 
     return res.status(200).json({ message: "Payment Confirmed" });

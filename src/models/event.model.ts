@@ -3,14 +3,12 @@ import { sequelize } from "../lib/connectDB";
 import User from "./user.model";
 
 class Event extends Model<InferAttributes<Event>, InferCreationAttributes<Event>> {
-  declare id: CreationOptional<string>;
+  declare event_id: CreationOptional<string>;
   declare organizer_id: string;
   declare title: string;
   declare description: string;
   declare date: Date;
   declare location: string;
-  declare target_amount: number;
-  declare contributed_so_far: number;
   declare bank_name: string;
   declare bank_code: string;
   declare account_no: string;
@@ -21,7 +19,7 @@ class Event extends Model<InferAttributes<Event>, InferCreationAttributes<Event>
 
 Event.init(
   {
-    id: {
+    event_id: {
       type: DataTypes.UUID,
       defaultValue: DataTypes.UUIDV4,
       allowNull: false,
@@ -50,14 +48,6 @@ Event.init(
     },
     location: {
       type: DataTypes.STRING,
-      allowNull: false,
-    },
-    target_amount: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    contributed_so_far: {
-      type: DataTypes.INTEGER,
       allowNull: false,
     },
     bank_name: {
