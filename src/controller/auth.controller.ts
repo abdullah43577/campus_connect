@@ -47,7 +47,7 @@ const register_user = async function (req: Request, res: Response) {
   }
 };
 
-const verifyOTP = async function (req: Request, res: Response) {
+const verify_email = async function (req: Request, res: Response) {
   try {
     const { email, code } = OTPSchema.parse(req.body);
 
@@ -192,4 +192,4 @@ const generate_new_token = async function (req: IUserRequest, res: Response) {
   }
 };
 
-export { register_user, verifyOTP, login_user, forgot_password, reset_password, generate_new_token };
+export { register_user, verify_email, login_user, forgot_password, reset_password, generate_new_token };
