@@ -35,7 +35,7 @@ Attendee.init(
       allowNull: false,
       references: {
         model: Event,
-        key: "id",
+        key: "event_id",
       },
     },
     package_id: {
