@@ -2,13 +2,16 @@ import { CreationOptional, DataTypes, InferAttributes, InferCreationAttributes, 
 import { sequelize } from "../lib/connectDB";
 import User from "./user.model";
 import Event from "./event.model";
+import Package from "./package.model";
 
 class Attendee extends Model<InferAttributes<Attendee>, InferCreationAttributes<Attendee>> {
   declare id: CreationOptional<string>;
   declare attendee_id: string;
   declare event_id: string;
+  declare package_id: string;
   declare amount_paid: CreationOptional<number>;
-  declare status: "confirmed" | "cancelled" | "pending";
+  declare balance_due: CreationOptional<number>;
+  declare payment_status: "complete" | "pending";
 }
 
 Attendee.init(
@@ -35,12 +38,24 @@ Attendee.init(
         key: "id",
       },
     },
+    package_id: {
+      type: DataTypes.UUID,
+      allowNull: false,
+      references: {
+        model: Package,
+        key: "package_id",
+      },
+    },
     amount_paid: {
       type: DataTypes.INTEGER,
       defaultValue: 0,
     },
-    status: {
-      type: DataTypes.ENUM("confirmed", "cancelled", "pending"),
+    balance_due: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+    },
+    payment_status: {
+      type: DataTypes.ENUM("complete", "pending"),
       defaultValue: "pending",
     },
   },
@@ -59,6 +74,9 @@ Attendee.init(
 //* one event has many attendees
 Event.hasMany(Attendee, { foreignKey: "event_id", onDelete: "CASCADE" });
 Attendee.belongsTo(Event, { foreignKey: "event_id" });
+
+Package.hasMany(Attendee, { foreignKey: "package_id", onDelete: "CASCADE" });
+Attendee.belongsTo(Package, { foreignKey: "package_id" });
 
 //* one user can attend many events
 User.hasMany(Attendee, { foreignKey: "attendee_id" });
