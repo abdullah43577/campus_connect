@@ -4,7 +4,7 @@ import { validateRefreshToken } from "../helper/validateToken";
 
 const router = Router();
 
-router.post("/register", register_user);
+router.post("/register", register_user as RequestHandler);
 router.post("/verify_otp", verify_email as RequestHandler);
 router.post("/login", login_user as RequestHandler);
 router.post("/forgot_password", forgot_password as RequestHandler);
