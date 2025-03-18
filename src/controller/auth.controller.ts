@@ -15,6 +15,11 @@ import { emailVerificationSuccess, EmailVerificationSuccessProps } from "../help
 const register_user = async function (req: Request, res: Response) {
   try {
     const { password, ...rest } = registerSchema.parse(req.body);
+
+    //* check if user exists
+    const user = await User.findOne({ where: { email: rest.email } });
+    if (user) return res.status(400).json({ message: "User already exists" });
+
     const hashedPassword = await hashPassword(password);
     const newObject = { ...rest, password: hashedPassword };
     const newUser = await User.create(newObject);
@@ -39,7 +44,7 @@ const register_user = async function (req: Request, res: Response) {
     const html = userRegistration(emailTemplateData);
 
     //* send mail
-    await transportMail({ email: rest.email, subject: "Thank you for joining campus connect", message: html });
+    await transportMail({ email: rest.email, subject: "Thank you for joining campus connect", message: html.html });
 
     res.status(200).json({ message: "An OTP was sent to the provided mail address" });
   } catch (error) {
@@ -75,7 +80,7 @@ const verify_email = async function (req: Request, res: Response) {
 
     const emailTemplateData: EmailVerificationSuccessProps = {
       username: user.first_name,
-      loginUrl: "https://campusconnect.com/login",
+      loginUrl: "https://localhost:3000/auth/login",
       heading: "Email Successfully Verified",
       body: "Congratulations! Your email has been successfully verified. Your Campus Connect account is now active and ready to use.",
       btnTxt: "Log in to Your Account",
@@ -83,7 +88,7 @@ const verify_email = async function (req: Request, res: Response) {
 
     const html = emailVerificationSuccess(emailTemplateData);
 
-    await transportMail({ email: user.email, subject: "Email Successfully Verified", message: html });
+    await transportMail({ email: user.email, subject: "Email Successfully Verified", message: html.html });
 
     res.status(200).json({ message: emailTemplateData.heading, tokens: { access_token, refresh_token } });
   } catch (error) {
@@ -100,7 +105,7 @@ const login_user = async function (req: Request, res: Response) {
       },
     });
 
-    if (!user) return res.status(404).json({ message: "User not found!" });
+    if (!user) return res.status(404).json({ message: "Invalid email or password!" });
 
     if (user.is_locked) return res.status(400).json({ message: "Account is locked due to multiple failed attempts, please contact the administrator" });
 

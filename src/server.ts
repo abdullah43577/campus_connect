@@ -15,12 +15,12 @@ import axios from "axios";
 const { PAYSTACK_TEST_SECRET_KEY } = process.env;
 
 const app = express();
-export const cache = new Cache({ stdTTL: 3600 });
+export const cache = new Cache({ stdTTL: 600, checkperiod: 120 });
 
 app.use(morgan("dev"));
 app.use(
   cors({
-    origin: "*",
+    origin: "http://localhost:3000",
     credentials: true,
   })
 );
