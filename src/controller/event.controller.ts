@@ -7,7 +7,7 @@ import { api, cache } from "../server";
 import Event from "../models/event.model";
 import Attendee from "../models/attendee.model";
 import User from "../models/user.model";
-import Payment from "../models/Payment.model";
+import Payment from "../models/payment.model";
 const { PAYSTACK_TEST_SECRET_KEY } = process.env;
 import crypto from "crypto";
 import Package from "../models/package.model";
