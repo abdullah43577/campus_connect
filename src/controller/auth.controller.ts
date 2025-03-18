@@ -11,6 +11,8 @@ import { IUserRequest } from "../interface";
 import { transportMail } from "../helper/transportMail";
 import { userRegistration, UserRegistrationProps } from "../helper/email-templates/user-registration";
 import { emailVerificationSuccess, EmailVerificationSuccessProps } from "../helper/email-templates/email-verification-success";
+import { passwordResetTemplate } from "../helper/email-templates/forgot-password";
+import { passwordResetConfirmationTemplate } from "../helper/email-templates/reset-password";
 
 const register_user = async function (req: Request, res: Response) {
   try {
@@ -142,11 +144,27 @@ const forgot_password = async function (req: Request, res: Response) {
 
     //* send reset mail
     const { code, expiresAt } = generateOTP();
-    const otp = await OTP.create({
+
+    await OTP.create({
       email,
       code,
       expires_at: expiresAt,
     });
+
+    //* create email template data
+    const emailTemplateData = {
+      heading: "Reset Your Password",
+      username: user.first_name,
+      body: "We received a request to reset your password for your Campus Connect account. Click the button below to set a new password. \n\n Reset token expires in 10 minutes \n\n If you didn’t request this, you can safely ignore this email.",
+      otp: code,
+      expiryTime: "10 minutes",
+    };
+
+    //* extract html
+    const html = passwordResetTemplate(emailTemplateData);
+
+    //* send mail
+    await transportMail({ email: user.email, subject: "Reset Your Password", message: html.html });
 
     res.status(200).json({ message: "reset otp sent" });
   } catch (error) {
@@ -176,6 +194,19 @@ const reset_password = async function (req: Request, res: Response) {
     await user.update({ password: newPassword });
     await otp.destroy();
 
+    //* send mail
+    const emailTemplateData = {
+      heading: "Your Password Has Been Reset",
+      username: user.first_name,
+      body: "Your password for your Campus Connect account has been successfully reset. If you made this change, you can safely ignore this message.\n\nIf you did not request this change, please contact our support team immediately at support@campusconnect.com.",
+      btnTxt: "Contact Support",
+      btnAction: "mailto:support@campusconnect.com",
+    };
+
+    const html = passwordResetConfirmationTemplate(emailTemplateData);
+
+    await transportMail({ email: user.email, subject: "Your Password Has Been Reset", message: html.html });
+
     res.status(200).json({ message: "Password reset successful" });
   } catch (error) {
     handleErrors({ res, error });
@@ -185,7 +216,6 @@ const reset_password = async function (req: Request, res: Response) {
 const generate_new_token = async function (req: IUserRequest, res: Response) {
   try {
     const { userId, role } = req;
-    const { refreshToken } = req.body;
 
     const user = await User.findByPk(userId);
     if (!user) return res.status(404).json({ message: "User not found!" });
