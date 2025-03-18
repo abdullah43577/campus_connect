@@ -1,6 +1,8 @@
 import { Sequelize } from "sequelize";
 const { POSTGRES_PASS, POSTGRES_USER, POSTGRES_DB, DATABASE_URL } = process.env;
 
+//*
+
 // export const sequelize = new Sequelize(`${POSTGRES_DB}`, `${POSTGRES_USER}`, `${POSTGRES_PASS}`, {
 //   host: "localhost",
 //   dialect: "postgres",
